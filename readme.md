@@ -60,7 +60,7 @@ impl<'a> Lexer<'a> {
 }
 
 impl<'a> Iterator for Lexer<'a> {
-    type Item = Token;
+    type Item = Result<Token, Error>;
     ...
 }
 ```
@@ -118,38 +118,47 @@ The pratt parsing will look like the following.
 ```
 // psuedo code
 fn parse_expr(self, prec) -> Expr {
-    let lhs = parse_prefix();
+    let lhs = self.parse_prefix();
     while prec < self.curr.prec {
-        lhs = parse_infix(lhs);
+        lhs = self.parse_infix(lhs);
     }
     return lhs
 }
 ```
-
 ## Evaluator
 
-<!-- The goal of this is to take a Expression and simplify it to a single value. -->
-<!-- The type structure for the values will be: -->
+The goal of this is to take a expression and simplify it to a single value.
+Then perform alpha, beta, and n reductions, and hopefully get the expression in normal form.
 
-<!-- ``` -->
-<!-- struct Value { -->
-<!--     Bound(String), -->
-<!--     Free(String, Uuid), -->
-<!--     Fn(String, Expression, Env), -->
-<!--     App(Box<Value>, Box<Value>), -->
-<!-- } -->
-<!-- ``` -->
+The type structure for the values will be the folllowing:
+
+```rust
+struct Value {
+    Bound(String),
+    Free(String, Uuid),
+    Fn(String, Expression),
+    App(Box<Value>, Box<Value>),
+}
+```
+
+I will implement this using a substitution based method.
+
+Some Notable Tests:
+
+- recursion
+- `(x => x x) (x => x x)`
 
 ## Simplifier
 
-<!-- Will attempt to show native datatypes. In human readable form. -->
-<!-- Such as: -->
-<!-- - Church Numerals -->
-<!-- - Church Booleans -->
-<!-- - Cons List -->
-<!-- - Pair -->
-<!-- This will be done by doing alpha, beta, and n reductions, and by pattern matching on the -->
-<!-- shapes of these data-types. -->
+Display result in a human-readable form if possible.
+The datatypes that we could try for are:
+
+- Church numerals
+- Church booleans
+- Cons list
+- Pair
+
+TODO: more thought has to go into the implementation of this
 
 # STD LIB
 
@@ -186,7 +195,7 @@ Necessary Functions
 
 ## Loops
 
-- Y combinator
+- Y combinatohttps://github.com/tsoding/lambr
 
 # CLI
 
@@ -202,3 +211,16 @@ NOTE: Clap would be **fire** for this...
 
 - <https://youtu.be/ViPNHMSUcog?si=aCoHfzR6RUfWVN-n>
 - <https://youtu.be/KuVUfbWoROw?si=KjtZz55prHMU8YeZ>
+- <https://github.com/tsoding/lamb>
+- <https://en.wikipedia.org/wiki/Lambda_calculus>
+
+# Alternatives
+
+- Lisp Interpreter
+
+```
+(defun add (x y) (+ x y))
+(add x y)
+
+(head '(1 2 3)) // 1
+```
